@@ -1,0 +1,137 @@
+---
+title: "Some Plots Exploring A Jenkins Thread Dump"
+output:
+  html_document:
+    toc: yes
+    code_folding: hide
+    fig_caption: yes
+    highlight: tango
+    theme: united
+---
+
+```{r results='hide', message=FALSE, warning=FALSE}
+# knitr::opts_chunk$set(echo = TRUE)
+# knitr::opts_chunk$set(fig.width=10) 
+library(plyr, warn.conflicts = FALSE)
+library(ggplot2, warn.conflicts = FALSE)
+library(stringr, warn.conflicts = FALSE)
+library(plotly, warn.conflicts = FALSE)
+
+setwd("~/workspace/repos/thread-lock-analysis/R Overview/")
+```
+
+```{r message=FALSE, cache=TRUE}
+data = read.csv(header = FALSE, "thread_data.csv", col.names = c("ID", "Name", "Prio", "State", "Time"))
+data$NewState = sapply(data$State, function(x) {
+  if(str_count(x, "wait") > 0) {
+    "Waiting"
+  }else "Running"
+})
+data$ID = as.character(data$ID)
+data$Name = sapply(data$Name, function(x) {
+  str_split(x, " from", simplify = TRUE)[1]
+})
+```
+
+```{r message=FALSE, cache=TRUE}
+plot = function(data) {
+  g <- data %>% ggplot(aes(Date, freq)) + 
+    geom_line(aes(color=NewState)) +
+    labs(colour="State") +
+    ylab("No. Of Threads") +
+    xlab("Date/Time") +
+    ggtitle("Frequency of Running vs. Waiting Threads Over Time")
+  ggplotly(g, tooltip = "all")
+}
+threashold = as.POSIXct("2018-01-18 1900", format="%Y-%m-%d %H%M")
+freq_data = count(data, vars=c("NewState", "Time"))
+freq_data$Date = as.POSIXct(freq_data$Time, origin="1970-01-01")
+freq_data = freq_data[freq_data$Date > threashold, ]
+plot(freq_data)
+```
+
+
+```{r message=FALSE, cache=TRUE, echo=FALSE}
+# ids = data$ID %>% unique
+# for(id in ids) {
+#   len = data[data$ID == id,]$NewState %>% unique %>% length
+#   if(len > 1) print(id)
+# }
+```
+
+```{r message=FALSE, warning=FALSE, dpi=120}
+my_data = data[data$ID == '139939698210816',]
+my_data$NewState = as.factor(my_data$NewState)
+my_data$group = 1
+
+my_data$Time = as.POSIXct(my_data$Time, origin="1970-01-01")
+my_data %>% ggplot(aes(Time, NewState, group = group)) + 
+  geom_point(aes(color=my_data$Name)) + 
+  scale_y_discrete(limits = rev(levels(my_data$NewState))) +
+  labs(colour="Thread Name") +
+  theme_bw() +
+  theme(legend.position = "top") +
+  ylab("State") +
+  xlab("Time") +
+  ggtitle(paste("Thread ID ", my_data$ID)) +
+  guides(colour = guide_legend(nrow = 2,
+                               label.theme = element_text(angle=0,size=7),
+                               title.position = "top", 
+                               title.theme = element_text(angle=0,face="bold", size=7)))
+  
+  
+```
+
+```{r message=FALSE, warning=FALSE, dpi=120}
+my_data = data[data$ID == '139938960125952',]
+my_data$NewState = as.factor(my_data$NewState)
+my_data$group = 1
+
+my_data %>% ggplot(aes(Time, NewState, group = group)) + 
+  geom_line(aes(color=my_data$Name)) + 
+  scale_y_discrete(limits = rev(levels(my_data$NewState))) +
+  labs(colour="Thread Name") +
+  theme_bw() +
+  theme(legend.position = "top") +
+  ylab("State") +
+  xlab("Time") +
+  ggtitle(paste("Thread ID ", my_data$ID)) +
+  guides(colour = guide_legend(nrow = 1,
+                               label.theme = element_text(angle=0,size=7),
+                               title.position = "top", 
+                               title.theme = element_text(angle=0,face="bold", size=7)))
+```
+
+```{r message=FALSE, warning=FALSE, dpi=120}
+g <- my_data %>% ggplot(aes(Time, NewState, group = group)) + 
+  geom_point(aes(color=my_data$Name)) + 
+  scale_y_discrete(limits = rev(levels(my_data$NewState))) +
+  labs(colour="Thread Name") +
+  theme_bw() +
+  theme(legend.position = "top") +
+  ylab("State") +
+  xlab("Time") +
+  ggtitle(paste("Thread ID ", my_data$ID)) +
+  guides(colour = guide_legend(nrow = 1,
+                               label.theme = element_text(angle=0,size=7),
+                               title.position = "top", 
+                               title.theme = element_text(angle=0,face="bold", size=7)))
+g
+```
+
+```{r message=FALSE, warning=FALSE, dpi=120, fig.width=8, fig.align='center'}
+freq_data = count(data, vars=c("Prio", "Time"))
+freq_data$Date = as.POSIXct(freq_data$Time, origin="1970-01-01")
+freq_data$Prio = freq_data$Prio %>% sapply(function(x){if(x == -1){"Missing"}else{x}})
+freq_data$Prio = as.factor(freq_data$Prio)
+
+g <- freq_data %>% ggplot(aes(Date, freq)) + 
+    geom_line(aes(color=Prio)) +
+    labs(colour="Priority") +
+    ylab("No. Of Threads") +
+    xlab("Date/Time") +
+    ggtitle("Frequency of Threads With Diff. Priorities Over Time") 
+
+ggplotly(g, tooltip = "all")
+```
+
