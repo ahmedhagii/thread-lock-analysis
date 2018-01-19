@@ -2,51 +2,69 @@
 title: "Some Plots Exploring A Jenkins Thread Dump"
 output:
   html_document:
-    toc: yes
     code_folding: hide
-    fig_caption: yes
+    toc: yes
     highlight: tango
-    theme: united
+    theme: unite
 ---
 
-```{r results='hide', message=FALSE, warning=FALSE}
-# knitr::opts_chunk$set(echo = TRUE)
+<style type="text/css">
+
+body{
+      font-size: 18px;
+}
+</style>
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
 # knitr::opts_chunk$set(fig.width=10) 
 library(plyr, warn.conflicts = FALSE)
 library(ggplot2, warn.conflicts = FALSE)
 library(stringr, warn.conflicts = FALSE)
 library(plotly, warn.conflicts = FALSE)
-
+library(scales)
+Sys.setenv(TZ="Europe/Vienna")
 setwd("~/workspace/repos/thread-lock-analysis/R Overview/")
 ```
 
-```{r message=FALSE, cache=TRUE}
-data = read.csv(header = FALSE, "thread_data.csv", col.names = c("ID", "Name", "Prio", "State", "Time"))
-data$NewState = sapply(data$State, function(x) {
-  if(str_count(x, "wait") > 0) {
-    "Waiting"
-  }else "Running"
-})
-data$ID = as.character(data$ID)
-data$Name = sapply(data$Name, function(x) {
-  str_split(x, " from", simplify = TRUE)[1]
-})
+
+```{r message=FALSE, message=FALSE, warning=FALSE, cache=TRUE, include=FALSE}
+load_data = function(filename) {
+  data = read.csv(header = FALSE, filename, col.names = c("ID", "Name", "Prio", "State", "Time"))
+  data$NewState = sapply(data$State, function(x) {
+    if(str_count(x, "wait") > 0) {
+      "Waiting"
+    }else "Running"
+  })
+  data$ID = as.character(data$ID)
+  data$Name = sapply(data$Name, function(x) {
+    str_split(x, " from", simplify = TRUE)[1]
+  })
+  data
+}
+data = load_data("thread_data.csv")
 ```
 
-```{r message=FALSE, cache=TRUE}
+
+
+## Number of Running and Waiting threads over time
+
+The spikes happened when I was messing around with Jenkins, installing few plugins and running some dummy tasks. you can zoom and move around the plot
+```{r message=FALSE, cache=TRUE, dpi=120, fig.width=8, fig.height=5}
 plot = function(data) {
   g <- data %>% ggplot(aes(Date, freq)) + 
     geom_line(aes(color=NewState)) +
     labs(colour="State") +
+    theme_bw() +
     ylab("No. Of Threads") +
     xlab("Date/Time") +
     ggtitle("Frequency of Running vs. Waiting Threads Over Time")
   ggplotly(g, tooltip = "all")
 }
-threashold = as.POSIXct("2018-01-18 1900", format="%Y-%m-%d %H%M")
+threashold = as.POSIXct("2018-01-18 1900", format="%Y-%m-%d %H%M", tz = Sys.getenv('TZ'))
 freq_data = count(data, vars=c("NewState", "Time"))
 freq_data$Date = as.POSIXct(freq_data$Time, origin="1970-01-01")
-freq_data = freq_data[freq_data$Date > threashold, ]
+# freq_data = freq_data[freq_data$Date > threashold, ]
 plot(freq_data)
 ```
 
@@ -59,6 +77,10 @@ plot(freq_data)
 # }
 ```
 
+## A specific thread change of states over time:
+
+
+The thread went into running state when I was executing a build, then went to waiting again after finishing
 ```{r message=FALSE, warning=FALSE, dpi=120}
 my_data = data[data$ID == '139939698210816',]
 my_data$NewState = as.factor(my_data$NewState)
@@ -70,7 +92,7 @@ my_data %>% ggplot(aes(Time, NewState, group = group)) +
   scale_y_discrete(limits = rev(levels(my_data$NewState))) +
   labs(colour="Thread Name") +
   theme_bw() +
-  theme(legend.position = "top") +
+  theme(legend.position = "top", plot.title = element_text(size=9, face="bold", hjust = 0.5)) +
   ylab("State") +
   xlab("Time") +
   ggtitle(paste("Thread ID ", my_data$ID)) +
@@ -82,6 +104,9 @@ my_data %>% ggplot(aes(Time, NewState, group = group)) +
   
 ```
 
+
+
+In the following two, the same thread with the same ID has a different name every time it goes into the Running state. The reason is that in the Jenkins implementation, it looks that they change the thread name each time the thread is handling an HTTP request 
 ```{r message=FALSE, warning=FALSE, dpi=120}
 my_data = data[data$ID == '139938960125952',]
 my_data$NewState = as.factor(my_data$NewState)
@@ -92,7 +117,7 @@ my_data %>% ggplot(aes(Time, NewState, group = group)) +
   scale_y_discrete(limits = rev(levels(my_data$NewState))) +
   labs(colour="Thread Name") +
   theme_bw() +
-  theme(legend.position = "top") +
+  theme(legend.position = "top", plot.title = element_text(size=9, face="bold", hjust = 0.5)) +
   ylab("State") +
   xlab("Time") +
   ggtitle(paste("Thread ID ", my_data$ID)) +
@@ -108,7 +133,7 @@ g <- my_data %>% ggplot(aes(Time, NewState, group = group)) +
   scale_y_discrete(limits = rev(levels(my_data$NewState))) +
   labs(colour="Thread Name") +
   theme_bw() +
-  theme(legend.position = "top") +
+  theme(legend.position = "top", plot.title = element_text(size=9, face="bold", hjust = 0.5)) +
   ylab("State") +
   xlab("Time") +
   ggtitle(paste("Thread ID ", my_data$ID)) +
@@ -119,7 +144,60 @@ g <- my_data %>% ggplot(aes(Time, NewState, group = group)) +
 g
 ```
 
-```{r message=FALSE, warning=FALSE, dpi=120, fig.width=8, fig.align='center'}
+The threads go into the running state for a very brief time periods then back into waiting, because the requests are not time consuming (no heavy logic or database queries involved), even the second plot that was plotting the thread executing a Jenkins build job was very short, because the task I ran was a dummy one executing very fast. 
+
+So, I tried running another task that would just sleep form some time and sampled a thread dump every 1 second so the thread would stay in the running state for some time. However, what happened is I got missing values for some of the time points e.g. (31:37) it means that the thread dump at that second didn't contain the thread with the ID "139939027800064". I don't know why would that happend (needs more investigation)
+```{r, dpi=120}
+data = load_data("thread_data_day2.csv")
+my_data = data[data$ID == "139939027800064",]
+my_data$NewState = as.factor(my_data$NewState)
+my_data$group = 1
+
+my_data$Time = as.POSIXct(my_data$Time, origin="1970-01-01")
+my_data %>% ggplot(aes(Time, NewState, group = group)) + 
+  geom_point(aes(color=my_data$Name,), alpha=0.6) + 
+  scale_y_discrete(limits = rev(levels(my_data$NewState))) +
+  labs(colour="Thread Name") +
+  theme_bw() +
+  theme(legend.position = "top", plot.title = element_text(size=9, face="bold", hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("State") +
+  xlab("Time") +
+  ggtitle(paste("Thread ID ", my_data$ID)) +
+  scale_x_datetime(labels = date_format("%M:%S"), date_breaks = "2 sec") +
+  guides(colour = guide_legend(nrow = 2,
+                               label.theme = element_text(angle=0,size=7),
+                               title.position = "top", 
+                               title.theme = element_text(angle=0,face="bold", size=7)))
+  
+  
+```
+
+```{r}
+# ids = data$ID %>% unique
+# for(id in ids) {
+#   len = data[data$ID == id,]$NewState %>% unique %>% length
+#   if(len > 1) {
+#     print(id)
+#     (data[data$ID == id,]$NewState == "Running") %>% sum %>% print
+#     # print(data[data$ID == id,]$Name %>% unique)
+#   }
+# }
+# 
+# list_ids = sapply(data$ID, function(x) {
+#   len = data[data$ID == x,]$NewState %>% unique %>% length
+#   if(len > 1) id else NA
+# }, simplify = TRUE)
+```
+
+
+
+## Frequency of different thread priorities over time
+
+
+This shows the frequency of different thread priorites. Ofcourse they have the same spikes like the above graphs and the most frequent priority is 5 since it's the default priority the JVM uses for new threads
+```{r message=FALSE, warning=FALSE, dpi=120, fig.width=8, fig.height=5}
+data = load_data("thread_data.csv")
 freq_data = count(data, vars=c("Prio", "Time"))
 freq_data$Date = as.POSIXct(freq_data$Time, origin="1970-01-01")
 freq_data$Prio = freq_data$Prio %>% sapply(function(x){if(x == -1){"Missing"}else{x}})
