@@ -1,0 +1,47 @@
+<div #chart>
+  <!-- Chart will appear here -->
+</div>
+
+<!--<div echarts *ngFor="let chart of charts" [options]="chart" class="demo-chart"></div>-->
+
+
+<div [hidden]="showSep" class="thread-count">
+    Total Thread Count: {{threadCount}}<br>
+    Over Period: {{period.from}} - {{period.to}}
+</div>
+
+<div class="line-separator" [hidden]="showSep"></div>
+
+<div class="content">
+    <div echarts [loading]="loading" [options]="threadsOverTimeChart" class="prio-chart my-chart"></div>
+    <div class="line-separator" [hidden]="showSep"></div>
+</div>
+
+<div class="content">
+    <div echarts [loading]="loading" *ngFor="let chart of prioCharts" [options]="chart" class="prio-chart my-chart"></div>
+    <div class="line-separator" [hidden]="showSep"></div>
+</div>
+
+
+<div class="content">
+    <div echarts [loading]="loading" *ngFor="let chart of statusCharts" [options]="chart" (chartClick)="onClick($event)" class="status-chart my-chart"></div>
+    <div class="line-separator" [hidden]="showSep"></div>
+</div>
+
+
+<div class="content" [hidden]="loading">
+    <table>
+        <tr>
+            <th>Method Name</th>
+            <th>Thread Count</th>
+        </tr>
+        <tr *ngFor="let row of methods" (click)="onMethodClick($event, row.name)" class="method-row">
+            <td class="method-name">{{row.name}}</td>
+            <td>{{row.count}}</td>
+        </tr>
+    </table>
+
+    <div class="line-separator" [hidden]="showSep"></div>
+</div>
+
+

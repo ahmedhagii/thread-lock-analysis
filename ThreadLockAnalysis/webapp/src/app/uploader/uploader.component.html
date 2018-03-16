@@ -1,0 +1,24 @@
+<table>
+  <tr>
+    <td>
+        <!--<input [hidden]="true" id="input-file-id" multiple type="file" (change)="fileChangeListener($event)" />-->
+        <!--<label for="input-file-id" (change)="fileChangeListener($event)" class="mdl-button mdl-js-button mdl-button&#45;&#45;raised mdl-js-ripple-effect mdl-color&#45;&#45;accent mdl-color-text&#45;&#45;accent-contrast">Choose Files</label>-->
+      <input type="file"
+             #fileImportInput
+             name="File Upload"
+             id="txtFileUpload"
+             class="btn btn-primary"
+             (change)="fileChangeListener($event)"
+             accept=".csv"
+             value={{selectedImageFile}}/>
+    </td>
+    <td style="padding: 5px;">
+      <!--<input type="button"-->
+             <!--name="Reset"-->
+             <!--id="txtFileReset"-->
+             <!--class="btn btn-primary"-->
+             <!--(click)="fileReset()"-->
+             <!--value="Reset"/>-->
+    </td>
+  </tr>
+</table>

@@ -1,0 +1,76 @@
+
+
+    <mat-accordion>
+        <mat-expansion-panel>
+            <mat-expansion-panel-header>
+                <mat-panel-title class="name">
+                    <strong>Name</strong>
+                </mat-panel-title>
+                <mat-panel-description class="status">
+                    <strong>Status</strong>
+                </mat-panel-description>
+                <mat-panel-description class="time-spent">
+                    <strong>Time Spent</strong>
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+        </mat-expansion-panel>
+        <mat-expansion-panel *ngFor="let thread of threads">
+            <mat-expansion-panel-header>
+                <mat-panel-title class="name">
+                    {{thread.name}}
+                </mat-panel-title>
+                <mat-panel-description class="status">
+                    {{thread.status}}
+                </mat-panel-description>
+                <mat-panel-description class="time-spent">
+                    <mat-progress-bar
+                        class="example-margin"
+                        [color]="'Warn'"
+                        [mode]="'determinate'"
+                        [value]="thread.timeSpent / period * 100">
+                    </mat-progress-bar>
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!--<mat-form-field>-->
+            <!--<input matInput placeholder="First name">-->
+            <!--</mat-form-field>-->
+
+            <!--<mat-form-field>-->
+            <!--<input matInput placeholder="Age">-->
+            <!--</mat-form-field>-->
+            <ng-template matExpansionPanelContent>
+                <table>
+                    <tr>
+                        <td><strong>Name</strong></td>
+                        <td>{{thread.name}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ID</strong></td>
+                        <td>{{thread.id}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status</strong></td>
+                        <td>{{thread.status}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Priority</strong></td>
+                        <td>{{thread.prio}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Time</strong></td>
+                        <td>{{thread.time}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Time Spent</strong></td>
+                        <td>{{thread.timeSpent}} secs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stacktrace</strong></td>
+                        <td><pre>{{thread.stacktrace}}</pre></td>
+                    </tr>
+                </table>
+            </ng-template>
+
+        </mat-expansion-panel>
+    </mat-accordion>

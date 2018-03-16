@@ -1,0 +1,49 @@
+:host(app-status-list) { width:100% }
+
+#content {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.demo-content {
+    border-radius: 2px;
+    padding: 80px 56px;
+    margin-bottom: 80px;
+}
+
+.demo-layout.is-small-screen .demo-content {
+    padding: 40px 28px;
+}
+
+.demo-content h3 {
+    margin-top: 48px;
+}
+
+
+mat-panel-title {
+    width: 20%
+}
+
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #9a9a9a;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+.status-chart {
+    height: 400px;
+    width: 80%;
+}
+

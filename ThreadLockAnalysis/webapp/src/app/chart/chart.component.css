@@ -1,0 +1,68 @@
+.method-row {
+    cursor: pointer;
+}
+.method-name:hover {
+    color: royalblue;
+}
+
+.content {
+    margin-top: 5%;
+}
+
+.content .my-chart {
+    display: inline-block;
+    *display: inline;
+    zoom: 1;
+    vertical-align: top;
+    font-size: 12px;
+    /*width: 45%;*/
+    /*margin-bottom: 2%;*/
+}
+
+.thread-count {
+    font-size: 20px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: Roboto;
+    font-weight: bold;
+    margin-top: 5%;
+}
+
+.status-chart {
+    height: 400px;
+    width: 45%;
+    matgin-left: auto;
+    margin-right: auto;
+}
+
+
+.prio-chart {
+    height: 400px;
+    width: 100%;
+}
+
+
+.line-separator{
+    height:1px;
+    background:#cccaca;
+    border-bottom:1px solid #cccaca;
+    margin: 5%;
+}
+
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #9a9a9a;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
