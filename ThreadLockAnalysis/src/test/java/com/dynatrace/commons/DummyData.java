@@ -94,6 +94,7 @@ public class DummyData {
     public static final String THREAD_2_CSV = "0x00007ffa00a06000,Attach Listener,9,RUNNABLE," + TIMESTAMP + "," + THREAD_2_STACK_TRACE;
     public static final String THREAD_3_CSV = "0x00007ffa01213800,pool-3-thread-1,5,WAITING," + TIMESTAMP + "," + THREAD_3_STACK_TRACE;
 
+    public static final List<String> THREAD_3_WANTEDLOCKS = Arrays.asList("java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject");
     public static final List<String> CSV_DATA = Arrays.asList(new String[]{THREAD_1_CSV, THREAD_2_CSV, THREAD_3_CSV});
 }
 

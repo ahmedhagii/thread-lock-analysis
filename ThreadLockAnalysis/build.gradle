@@ -24,6 +24,8 @@ repositories {
 dependencies {
     compile 'com.sparkjava:spark-core:2.3'
     compile 'com.google.code.gson:gson:2.8.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
 
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.1.0-RC1'
     testCompile('org.junit.jupiter:junit-jupiter-engine:5.0.1')

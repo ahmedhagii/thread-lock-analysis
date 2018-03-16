@@ -1,6 +1,8 @@
 package com.dynatrace.threadlock.deadlock;
 
-import java.util.Date;
+import com.dynatrace.threadlock.objects.ThreadObject;
+
+import java.util.*;
 
 public class Resource {
 
@@ -8,9 +10,11 @@ public class Resource {
     public String name;
     public Date lockedAt;
 
-    public Resource(String name, ThreadObject holder) {
-        this.holder = holder;
+    public Set<ThreadObject> requesters;
+
+    public Resource(String name) {
         this.name = name;
+        requesters = new HashSet<>();
     }
 
 }

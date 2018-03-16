@@ -3,6 +3,7 @@ package com.dynatrace.threadlock.parser;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -24,16 +25,17 @@ public class GenerateCSV {
                 threadRegex.getThreadName(threadData), threadRegex.getThreadPriority(threadData),
                 threadRegex.getThreadState(threadData), dateTime) +
                 threadRegex.getThreadStacktrace(threadData) +
-                "," + threadRegex.getThreadLockedObjects(threadData);
+                "," + threadRegex.getThreadLockedObjects(threadData) +
+                "," + threadRegex.getThreadWantedLocks(threadData);
         return result;
     }
 
     /**
-     * Given the whole thread dump, generates a formatted CSV line for each thread trace
-     * appearing in that dump and return a list of them.
-     * @param threadDump the thread dump
-     * @param timestamp the unix timestamp of capturing the dump
-     * @return A list of CSV lines for evey thread trace in the dump.
+     * Given the whole thread jenkins, generates a formatted CSV line for each thread trace
+     * appearing in that jenkins and return a list of them.
+     * @param threadDump the thread jenkins
+     * @param timestamp the unix timestamp of capturing the jenkins
+     * @return A list of CSV lines for evey thread trace in the jenkins.
      */
     public List<String> generateCSVData(String threadDump, String timestamp) {
         List<String> individualThreads = threadRegex.getThreads(threadDump);
@@ -61,6 +63,7 @@ public class GenerateCSV {
 
         this.openWriterBuffer(outputDir + outputFileName);
         for (File csvFile : files) {
+            System.out.println(csvFile.getName());
             BufferedReader reader = new BufferedReader(new FileReader(csvFile));
             StringBuilder content = new StringBuilder();
             while(reader.ready()) {
@@ -69,7 +72,7 @@ public class GenerateCSV {
                     content.append(System.lineSeparator());
             }
 
-            String timestamp = "";
+            String timestamp = "1";
             String[] fileNameSplits = csvFile.getName().split("\\.");
             if(fileNameSplits.length > 1) timestamp = fileNameSplits[fileNameSplits.length - 1];
 

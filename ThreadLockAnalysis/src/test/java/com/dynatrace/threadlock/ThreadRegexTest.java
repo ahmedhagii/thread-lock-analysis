@@ -66,4 +66,14 @@ class ThreadRegexTest extends TestClass {
         assertEquals(expected, returned);
     }
 
+    @Test
+    void shouldGetWantedLocks() {
+        ThreadRegex threadRegex = new ThreadRegex();
+        List<String> expected = DummyData.THREAD_3_WANTEDLOCKS;
+        List<String> returned = threadRegex.getThreadWantedLocksList(DummyData.THREAD_3);
+        assertEquals(expected, returned);
+    }
+
+
+
 }

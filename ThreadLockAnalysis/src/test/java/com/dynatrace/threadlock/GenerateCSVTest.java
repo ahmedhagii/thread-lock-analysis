@@ -47,7 +47,7 @@ class GenerateCSVTest extends TestClass {
     void shouldReadDumpDirAndGenerateCSV() throws IOException {
         GenerateCSV generateCSV = new GenerateCSV();
 
-        // Write some dummy thread dump files
+        // Write some dummy thread jenkins files
         BufferedWriter writer = new BufferedWriter(new FileWriter(String.format(this.dir + "dump1.%s", DummyData.TIMESTAMP)));
         writer.write(DummyData.THREAD_DUMP);
         writer.flush();
@@ -60,7 +60,7 @@ class GenerateCSVTest extends TestClass {
 
         String inputDir = this.dir;
         String outputDir = this.dir;
-        generateCSV.readDumpFilesAndGenerateCSV(inputDir, "dump", outputDir, "thread_data.csv");
+        generateCSV.readDumpFilesAndGenerateCSV(inputDir, "jenkins", outputDir, "jenkins.csv");
 
         // read the data written to 'thread_data.csv' and match it to the ones in DummyData class
         BufferedReader reader = new BufferedReader(new FileReader(this.dir + "thread_data.csv"));
